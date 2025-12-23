@@ -7,6 +7,7 @@
     "@types/jsonwebtoken": "^9.0.10"
   },
   "scripts": {
-  "postinstall": "prisma generate"
-}
+    "postinstall": "prisma generate",
+    "build": "prisma generate && next build"
+  }
 }
