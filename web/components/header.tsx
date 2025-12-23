@@ -31,11 +31,10 @@ export default function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // ✅ RODA APENAS NO CLIENT
+  // ✅ roda só no client e lê COOKIE (não localStorage)
   useEffect(() => {
     setMounted(true);
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
+    setIsAuthenticated(document.cookie.includes('token='));
   }, []);
 
   function toggleMenu() {
@@ -43,12 +42,12 @@ export default function Header() {
   }
 
   function handleLogout() {
-    localStorage.removeItem('token');
+    document.cookie = 'token=; Max-Age=0; path=/';
     setIsAuthenticated(false);
     router.push('/login');
   }
 
-  // ⛔ evita hydration mismatch
+  // evita hydration mismatch
   if (!mounted) return null;
 
   return (
@@ -86,7 +85,15 @@ export default function Header() {
               <li><Link href="/agenda">Avisos</Link></li>
             </ul>
 
-            {isAuthenticated && (
+            {/* AÇÕES */}
+            {!isAuthenticated ? (
+              <Link
+                href="/login"
+                className="border-2 border-[#d4af37] px-4 py-2 rounded-full text-xs font-bold text-[#d4af37] hover:bg-[#d4af37] hover:text-white"
+              >
+                Entrar
+              </Link>
+            ) : (
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen((v) => !v)}
@@ -118,7 +125,6 @@ export default function Header() {
       </header>
 
       {/* MENU MOBILE */}
-      {/* MENU MOBILE */}
       {isOpen && (
         <div className="fixed inset-0 z-50">
           <div
@@ -126,9 +132,7 @@ export default function Header() {
             onClick={toggleMenu}
           />
 
-          <aside
-            className="absolute left-0 top-0 h-full w-72 bg-white shadow-lg transform transition-transform"
-          >
+          <aside className="absolute left-0 top-0 h-full w-72 bg-white shadow-lg">
             <div className="p-6 flex justify-between items-center border-b">
               <span className="font-bold">Menu</span>
               <button onClick={toggleMenu}>
@@ -142,7 +146,14 @@ export default function Header() {
               <MobileLink href="/agenda" icon={<BookOpen size={20} />} label="Catequese" onClick={toggleMenu} />
               <MobileLink href="/agenda" icon={<Bell size={20} />} label="Avisos" onClick={toggleMenu} />
 
-              {isAuthenticated && (
+              {!isAuthenticated ? (
+                <Link
+                  href="/login"
+                  className="mt-6 p-4 text-center border border-[#d4af37] text-[#d4af37] rounded-xl font-bold"
+                >
+                  Entrar
+                </Link>
+              ) : (
                 <>
                   <Link
                     href="/perfil"
@@ -163,7 +174,6 @@ export default function Header() {
           </aside>
         </div>
       )}
-
     </>
   );
 }

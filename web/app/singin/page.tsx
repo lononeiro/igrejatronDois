@@ -3,89 +3,89 @@
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const router = useRouter();
 
-    const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  async function handleRegister(event: FormEvent) {
+    event.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
-    async function handleLogin(event: FormEvent) {
-        event.preventDefault();
-        setIsLoading(true);
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-        setTimeout(() => {
-            const loginSucesso = true;
+      const data = await response.json();
 
-            if (loginSucesso) {
-                router.push('/');
-            }
-            else {
-                alert('Falha no login. Verifique suas credenciais e tente novamente.');
-                setIsLoading(false);
-            }
-        }, 1000);
+      if (!response.ok) {
+        setError(data.error || 'Erro ao cadastrar');
+        setIsLoading(false);
+        return;
+      }
+
+      // cadastro OK → vai pro login
+      router.push('/login');
+
+    } catch (err) {
+      console.error(err);
+      setError('Erro inesperado');
+      setIsLoading(false);
     }
+  }
 
-    return (
-        <main className="flex min-h-screen w-full items-center justify-center bg-gray-100 p-4 md:p-0">
-            {/* Container Principal que segura a Imagem e o Form */}
-            <div className="flex max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl md:flex-row flex-col">
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow">
+        <h1 className="text-xl font-bold mb-6">Criar conta</h1>
 
-                {/* LADO 1: Imagem (Escondida no celular ou em cima, visível no lado no PC) */}
-                {/* <div className="relative hidden w-1/2 bg-blue-900 md:block">
-                    <img
-                        src="/pomba.png"
-                        alt="Igreja"
-                        className="h-full w-full object-cover opacity-60"
-                    />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center text-white">
-                        <h2 className="mb-2 text-3xl font-bold italic">"Tudo posso naquele que me fortalece"</h2>
-                        <p className="text-sm opacity-80">Bem-vindo de volta à nossa comunidade.</p>
-                    </div>
-                </div> */}
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label className="block text-sm">E-mail</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border p-3 rounded"
+            />
+          </div>
 
-                {/* LADO 2: Formulário de Login */}
-                <div className="flex w-full flex-col justify-center p-8  lg:p-12">
-                    <div className="mb-8">
-                        <h1 className="text-xl font-bold text-gray-800">Acesse sua conta para continuar</h1>
-                    </div>
+          <div>
+            <label className="block text-sm">Senha</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border p-3 rounded"
+            />
+          </div>
 
-                    <form onSubmit={handleLogin} className="space-y-4">
-                        <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700">E-mail</label>
-                            <input
-                                required
-                                type="email"
-                                className="w-full rounded-lg border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all hover:border-blue-500"
-                            />
-                        </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
 
-                        <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700">Senha</label>
-                            <input
-                                required
-                                type="password"
-                                placeholder="••••••••"
-                                className="w-full rounded-lg border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all hover:border-blue-500"
-                            />
-                        </div>
+          <button
+            disabled={isLoading}
+            className="w-full bg-blue-600 text-white p-3 rounded"
+          >
+            {isLoading ? 'Cadastrando...' : 'Cadastrar'}
+          </button>
+        </form>
 
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="w-full rounded-lg bg-blue-600 p-3 font-semibold text-white transition hover:bg-blue-700">
-                            {isLoading ? 'Carregando...' : 'Cadastrar'}
-                        </button>
-                    </form>
-
-                    <div className="flex items-center justify-center">
-                        <p className="mt-6 text-center text-sm text-gray-500">
-                            Já possui uma conta?
-                            <a href="/login" className="text-blue-600 hover:underline ml-1">Clique aqui</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </main>
-    );
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Já possui conta?
+          <a href="/login" className="text-blue-600 ml-1 hover:underline">
+            Entrar
+          </a>
+        </p>
+      </div>
+    </main>
+  );
 }

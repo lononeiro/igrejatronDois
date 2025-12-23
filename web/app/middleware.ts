@@ -4,16 +4,18 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
 
-  const isAuthPage =
-    request.nextUrl.pathname.startsWith('/login') ||
-    request.nextUrl.pathname.startsWith('/singin');
+  const { pathname } = request.nextUrl;
 
-  // ❌ Não autenticado tentando acessar página protegida
+  const isAuthPage =
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/singin');
+
+  // NÃO autenticado → só pode acessar login
   if (!token && !isAuthPage) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // ✅ Já autenticado tentando acessar login
+  // Autenticado → não pode voltar para login
   if (token && isAuthPage) {
     return NextResponse.redirect(new URL('/', request.url));
   }
@@ -21,7 +23,6 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Rotas protegidas
 export const config = {
   matcher: [
     '/',
