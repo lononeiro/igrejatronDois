@@ -7,6 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+modal Igreja {
+  id              String   @id @default(cuid())
+  nome            String
+  endereco        String
+}
+
+
+
 model Evento {
   id              String   @id @default(cuid())
   title           String

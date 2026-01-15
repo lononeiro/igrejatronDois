@@ -7,12 +7,12 @@ import bcrypt from "bcryptjs";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password, role } = body;
+    const { email, password, role, igrejaId } = body;
 
     // Validação básica
-    if (!email || !password) {
+    if (!email || !password || !igrejaId) {
       return NextResponse.json(
-        { error: "Email e senha são obrigatórios" },
+        { error: "Email, senha e igrejaId são obrigatórios" },
         { status: 400 }
       );
     }
@@ -38,6 +38,9 @@ export async function POST(request: Request) {
         email,
         password: senhaHash,
         role: role || "common", // default seguro
+        igreja: {
+          connect: { id: igrejaId },
+        },
       },
     });
 

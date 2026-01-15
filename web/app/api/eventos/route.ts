@@ -35,12 +35,13 @@ export async function POST(request: Request) {
       date: string;
       description?: string;
       backgroundColor?: string;
+      igrejaId: string;
     } = await request.json();
 
     // Validação básica
-    if (!body.title || !body.date) {
+    if (!body.title || !body.date || !body.igrejaId) {
       return NextResponse.json(
-        { error: "Título e data são obrigatórios" },
+        { error: "Título, data e igrejaId são obrigatórios" },
         { status: 400 }
       );
     }
@@ -55,6 +56,11 @@ export async function POST(request: Request) {
         backgroundColor: body.backgroundColor ?? "#1e3a8a",
         textColor: "#ffffff",
         description: body.description ?? "",
+        igreja: {
+          connect: {
+            id: body.igrejaId,
+          },
+        },
       },
     });
 
